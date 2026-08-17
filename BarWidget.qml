@@ -1,46 +1,69 @@
 import QtQuick
+import qs.Commons
 import qs.Ui
 
-// The host injects `bar`, `moduleName`, and the inline `settings` object into
-// every BarWidget. Shared qs.Ui controls inherit the active Omarchy theme.
 BarWidget {
   id: root
-  moduleName: "io.github.vuhuy.starter-widget"
+  moduleName: "io.github.vuhuy.clipboard-manager"
 
-  readonly property string label: String(setting("label", "Hello, BOI!"))
-  readonly property string tooltip: String(setting("tooltip", "Left click to run the configured action"))
-  readonly property string actionCommand: String(setting("command", "")).trim()
-  readonly property bool useAccent: setting("accent", false) === true
-  readonly property real horizontalMargin: Number(setting("horizontalMargin", 8))
+  readonly property string tooltip: String(setting("tooltip", "Clipboard history"))
+  readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
 
-  function activate() {
-    if (!root.bar) return
+  function injectPanel() {
+    var target = panelLoader.item
+    if (!target) return
+    if ("bar" in target) target.bar = root.bar
+    if ("settings" in target) target.settings = root.settings
+    if ("anchorItem" in target) target.anchorItem = button
+    if ("hostWidget" in target) target.hostWidget = root
+  }
 
-    if (root.actionCommand) {
-      root.bar.run(root.actionCommand)
-    } else {
-      root.bar.run("omarchy-notification-send " + root.bar.shellQuote(root.label))
-    }
+  function open() {
+    if (panelLoader.item) panelLoader.item.open()
+  }
+
+  function close() {
+    if (panelLoader.item) panelLoader.item.close()
+  }
+
+  function toggle() {
+    if (panelLoader.item) panelLoader.item.toggle()
+  }
+
+  readonly property bool popoutSwitchClosing: panelLoader.item
+    ? panelLoader.item.popoutSwitchClosing === true : false
+
+  function closeForPopoutSwitch() {
+    if (panelLoader.item) panelLoader.item.closeForPopoutSwitch()
   }
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
-  WidgetButton {
+  onBarChanged: injectPanel()
+  onSettingsChanged: injectPanel()
+
+  Loader {
+    id: panelLoader
+    active: true
+    source: Qt.resolvedUrl("Panel.qml")
+    visible: false
+    onLoaded: {
+      root.injectPanel()
+      Qt.callLater(root.injectPanel)
+    }
+  }
+
+  BarIconButton {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: root.label
+    text: "󰅌"
     tooltipText: root.tooltip
-    active: root.useAccent
-    horizontalMargin: root.horizontalMargin
-    textRotation: root.vertical ? -90 : 0
-    fixedHeight: root.vertical
-      ? Math.max(root.barSize, labelWidth + scaledHorizontalMargin * 2)
-      : -1
+    active: root.opened
 
     onPressed: function(mouseButton) {
-      if (mouseButton === Qt.LeftButton) root.activate()
+      if (mouseButton === Qt.LeftButton) root.toggle()
     }
   }
 }

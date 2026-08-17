@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "io.github.vuhuy.starter-widget",
-  "name": "Clipboard Viewer",
+  "id": "io.github.vuhuy.clipboard-manager",
+  "name": "Clipboard Manager",
   "version": "0.1.0",
   "author": "Huy Vu Quang",
   "license": "MIT",
-  "description": "A configurable, theme-aware Omarchy bar widget for starting new plugins.",
+  "description": "A native Omarchy bar panel for browsing and reusing clipboard history.",
   "kinds": [
     "bar-widget"
   ],
@@ -13,54 +13,31 @@
     "barWidget": "BarWidget.qml"
   },
   "barWidget": {
-    "displayName": "Starter Widget",
-    "description": "Configurable label and click action for learning the Omarchy plugin API.",
-    "category": "Plugin",
-    "allowMultiple": true,
+    "displayName": "Clipboard Manager",
+    "description": "Search, preview, paste, and manage Omarchy clipboard history.",
+    "category": "Utility",
+    "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {
-      "label": "Hello, Youtube!",
-      "tooltip": "Left click to run the configured action",
-      "command": "",
-      "accent": false,
-      "horizontalMargin": 8
+      "tooltip": "Clipboard history",
+      "maxResults": 50
     },
     "schema": [
-      {
-        "key": "label",
-        "type": "string",
-        "label": "Label",
-        "defaultValue": "Hello, Sadboi!"
-      },
       {
         "key": "tooltip",
         "type": "string",
         "label": "Tooltip",
-        "defaultValue": "Left click to run the configured action"
+        "defaultValue": "Clipboard history"
       },
       {
-        "key": "command",
-        "type": "string",
-        "label": "Command",
-        "description": "Shell command to run on left click. Empty shows a notification.",
-        "defaultValue": ""
-      },
-      {
-        "key": "accent",
-        "type": "boolean",
-        "label": "Use accent color",
-        "defaultValue": false
-      },
-      {
-        "key": "horizontalMargin",
+        "key": "maxResults",
         "type": "integer",
-        "label": "Horizontal margin",
-        "min": 0,
-        "max": 32,
-        "step": 1,
-        "defaultValue": 8
+        "label": "Maximum visible results",
+        "min": 10,
+        "max": 150,
+        "step": 10,
+        "defaultValue": 50
       }
     ]
   }
 }
-

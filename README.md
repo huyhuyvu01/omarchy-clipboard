@@ -1,93 +1,70 @@
-# Omarchy Quattro Plugin Starter
+# Clipboard Manager for Omarchy
 
-A small, working Omarchy Shell plugin repository you can use as the starting
-point for a real plugin. The included example is a configurable bar widget that
-uses Omarchy's shared UI components, follows the active theme, supports
-horizontal and vertical bars, and runs a user-configured command when clicked.
+A theme-aware clipboard history panel for the Omarchy Quattro bar. The widget
+lives in the right section by default and opens an anchored panel on left click.
 
-> This repository is a starter, not a marketplace submission yet. Confirm the
-> permanent plugin ID and replace the example identity before publishing.
+It is deliberately a UI companion to Omarchy's built-in clipboard service. It
+reads the same history file and uses Omarchy's own helpers for pasting, copying,
+and opening entries, so it does not start a second `wl-paste` watcher.
 
-## What is included
+## Features
 
-- A schema-version 1 `manifest.json` at the repository root
-- A theme-native `bar-widget` entry point in `BarWidget.qml`
-- Editable settings for label, tooltip, click command, accent state, and margin
-- Local validation and tests in `scripts/check`
-- A safe local-development symlink helper in `scripts/link-local`
-- GitHub Actions validation on pushes and pull requests
-- Development and marketplace publishing guides under `docs/`
+- Search clipboard history by typing while the panel is open
+- Preview text, copied files, and captured images
+- Left click or press Enter to paste an entry
+- Right click or press Shift+Enter to copy without pasting
+- Press Alt+Enter to open an entry with Omarchy's clipboard opener
+- Remove individual entries or clear the complete history
+- Keyboard navigation with arrows, Page Up/Down, Home, End, and Escape
+- Native Omarchy colors, spacing, bar orientation, and popout coordination
 
-No external runtime dependencies are required beyond Omarchy Quattro and the
-packages it ships. Plugins execute unsandboxed inside the long-running
-`omarchy-shell` process, so users should review plugin code before enabling it.
+## Requirements
 
-## Quick start
+- Omarchy Quattro
+- The built-in `omarchy.clipboard` service enabled (the Omarchy default)
+- Omarchy's standard clipboard helper commands
 
-First, replace the starter identity as described in [CONTRIBUTING.md](CONTRIBUTING.md).
-Then validate the repository:
+The panel consumes
+`~/.local/state/omarchy/clipboard-history.json`. Clipboard monitoring and
+sensitive-clipboard filtering remain owned by the built-in service.
+
+## Local development
+
+Validate the plugin, link this checkout, and enable it in the right bar section:
 
 ```bash
 ./scripts/check
-```
-
-On a machine running Omarchy Quattro, link this checkout into the plugin
-directory and enable it:
-
-```bash
 ./scripts/link-local
-omarchy plugin enable io.github.vuhuy.starter-widget --section right
+omarchy plugin enable io.github.vuhuy.clipboard-manager --section right
 ```
 
-Saving a file below the linked checkout should trigger a hot reload. To force
-one, including disabling, unlinking, relinking, rescanning, and re-enabling the
-plugin:
+Saving files below the linked checkout should trigger a hot reload. To force a
+complete reload:
 
 ```bash
 ./scripts/link-local --reload
 ```
 
-Remove the development link safely with Omarchy's own command:
+Remove the development link safely with:
 
 ```bash
-omarchy plugin remove io.github.vuhuy.starter-widget
+omarchy plugin remove io.github.vuhuy.clipboard-manager
 ```
-
-Omarchy detects that the installed plugin is a symlink and removes only the
-link; it does not delete this checkout.
 
 ## Install from GitHub
 
-Once this is pushed to its own public GitHub repository, users install and
-enable it with:
+Once published, install and enable it with:
 
 ```bash
-omarchy plugin add https://github.com/YOUR_GITHUB_NAME/YOUR_REPOSITORY.git
-omarchy plugin enable io.github.vuhuy.starter-widget --section right
+omarchy plugin add https://github.com/vuhuy/omarchy-plugins.git
+omarchy plugin enable io.github.vuhuy.clipboard-manager --section right
 ```
 
-Update or remove it with:
+## Acknowledgements
 
-```bash
-omarchy plugin update io.github.vuhuy.starter-widget
-omarchy plugin remove io.github.vuhuy.starter-widget
-```
-
-The installer clones files, validates the manifest, and changes enabled state.
-This starter has no install hooks, does not use `sudo`, and does not overwrite
-user configuration.
-
-## Make it yours
-
-The manifest may declare one or more kinds: `bar-widget`, `bar`, `panel`,
-`overlay`, `menu`, or `service`. Each kind needs its matching entry-point key.
-See [docs/development.md](docs/development.md) for the mapping, configuration
-model, and recommended workflow.
-
-When the plugin is ready, follow [docs/publishing.md](docs/publishing.md). The
-marketplace expects one plugin per public GitHub repository, a root manifest,
-README and license, safe installation/removal, and optionally a root
-`preview.png` (or another supported preview image format).
+A lot of integration i borrow from the official
+[Omarchy clipboard plugin](https://github.com/basecamp/omarchy/tree/quattro/shell/plugins/clipboard).
+The panel itself is designed for this bar-widget plugin.
 
 ## License
 
