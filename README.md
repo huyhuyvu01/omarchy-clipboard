@@ -1,5 +1,7 @@
 # Clipboard Manager for Omarchy
 
+![Clipboard Manager panel](docs/image.png)
+
 A theme-aware clipboard history panel for the Omarchy Quattro bar. The widget
 lives in the right section by default and opens an anchored panel on left click.
 
