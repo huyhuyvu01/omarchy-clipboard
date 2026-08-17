@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "io.github.vuhuy.starter-widget",
-  "name": "Starter Widget",
+  "name": "Clipboard Viewer",
   "version": "0.1.0",
   "author": "Huy Vu Quang",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "allowMultiple": true,
     "defaultSection": "right",
     "defaults": {
-      "label": "Hello, Omarchy!",
+      "label": "Hello, Youtube!",
       "tooltip": "Left click to run the configured action",
       "command": "",
       "accent": false,
@@ -30,7 +30,7 @@
         "key": "label",
         "type": "string",
         "label": "Label",
-        "defaultValue": "Hello, Omarchy!"
+        "defaultValue": "Hello, Sadboi!"
       },
       {
         "key": "tooltip",

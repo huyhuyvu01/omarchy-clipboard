@@ -40,10 +40,11 @@ omarchy plugin enable io.github.vuhuy.starter-widget --section right
 ```
 
 Saving a file below the linked checkout should trigger a hot reload. To force
-one:
+one, including disabling, unlinking, relinking, rescanning, and re-enabling the
+plugin:
 
 ```bash
-omarchy-shell shell rescanPlugins
+./scripts/link-local --reload
 ```
 
 Remove the development link safely with Omarchy's own command:
@@ -91,4 +92,3 @@ README and license, safe installation/removal, and optionally a root
 ## License
 
 [MIT](LICENSE)
-

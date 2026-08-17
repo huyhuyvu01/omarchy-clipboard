@@ -60,7 +60,8 @@ Defaults and editor fields are advertised with `barWidget.defaults` and
 4. Enable and place the widget with `omarchy plugin enable <id> --section right`.
 5. Edit normally; the plugin directory watcher reloads local changes.
 6. Inspect discovery with `omarchy-shell shell listPlugins`.
-7. Force a reload with `omarchy-shell shell rescanPlugins` if needed.
+7. Force a full disable, unlink, relink, rescan, and enable cycle with
+   `./scripts/link-local --reload` if needed.
 
 The official compatibility check is:
 

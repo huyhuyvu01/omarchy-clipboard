@@ -7,7 +7,7 @@ BarWidget {
   id: root
   moduleName: "io.github.vuhuy.starter-widget"
 
-  readonly property string label: String(setting("label", "Hello, Omarchy!"))
+  readonly property string label: String(setting("label", "Hello, BOI!"))
   readonly property string tooltip: String(setting("tooltip", "Left click to run the configured action"))
   readonly property string actionCommand: String(setting("command", "")).trim()
   readonly property bool useAccent: setting("accent", false) === true
