@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.vuhuy.starter-widget",
+  "name": "Starter Widget",
+  "version": "0.1.0",
+  "author": "Huy Vu Quang",
+  "license": "MIT",
+  "description": "A configurable, theme-aware Omarchy bar widget for starting new plugins.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Starter Widget",
+    "description": "Configurable label and click action for learning the Omarchy plugin API.",
+    "category": "Plugin",
+    "allowMultiple": true,
+    "defaultSection": "right",
+    "defaults": {
+      "label": "Hello, Omarchy!",
+      "tooltip": "Left click to run the configured action",
+      "command": "",
+      "accent": false,
+      "horizontalMargin": 8
+    },
+    "schema": [
+      {
+        "key": "label",
+        "type": "string",
+        "label": "Label",
+        "defaultValue": "Hello, Omarchy!"
+      },
+      {
+        "key": "tooltip",
+        "type": "string",
+        "label": "Tooltip",
+        "defaultValue": "Left click to run the configured action"
+      },
+      {
+        "key": "command",
+        "type": "string",
+        "label": "Command",
+        "description": "Shell command to run on left click. Empty shows a notification.",
+        "defaultValue": ""
+      },
+      {
+        "key": "accent",
+        "type": "boolean",
+        "label": "Use accent color",
+        "defaultValue": false
+      },
+      {
+        "key": "horizontalMargin",
+        "type": "integer",
+        "label": "Horizontal margin",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "defaultValue": 8
+      }
+    ]
+  }
+}
+

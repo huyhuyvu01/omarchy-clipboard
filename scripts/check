@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -euo pipefail
+
+ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+
+python3 "$ROOT_DIR/scripts/validate_manifest.py" "$ROOT_DIR"
+python3 -m unittest discover -s "$ROOT_DIR/tests" -p 'test_*.py'
+
+if command -v omarchy >/dev/null 2>&1; then
+  # Validate the files that would actually be published. Local agent folders
+  # are intentionally ignored and may contain symlinks forbidden in plugins.
+  STAGE_DIR=$(mktemp -d)
+  trap 'rm -rf -- "$STAGE_DIR"' EXIT
+  while IFS= read -r -d '' relative_path; do
+    mkdir -p "$STAGE_DIR/$(dirname -- "$relative_path")"
+    cp -a -- "$ROOT_DIR/$relative_path" "$STAGE_DIR/$relative_path"
+  done < <(git -C "$ROOT_DIR" ls-files --cached --others --exclude-standard -z)
+  omarchy plugin validate "$STAGE_DIR"
+else
+  echo "note: omarchy not found; skipped the official runtime validator"
+fi
