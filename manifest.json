@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.vuhuy.clipboard-manager",
   "name": "Clipboard Manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Huy Vu Quang",
   "license": "MIT",
   "description": "A native Omarchy bar panel for browsing and reusing clipboard history.",
