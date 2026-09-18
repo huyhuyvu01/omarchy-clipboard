@@ -164,8 +164,8 @@ Panel {
     bar: root.bar
     open: root.opened
     focusTarget: keyCatcher
-    contentWidth: panel.fittedContentWidth(Style.space(560))
-    contentHeight: panel.cappedContentHeight(Style.space(620))
+    contentWidth: panel.fittedContentWidth(Style.space(400))
+    contentHeight: panel.cappedContentHeight(Style.space(440))
 
     Item {
       id: keyCatcher
@@ -234,104 +234,96 @@ Panel {
 
       Column {
         anchors.fill: parent
-        spacing: Style.space(10)
+        spacing: Style.space(8)
 
-        Item {
-          width: parent.width
-          height: Style.space(34)
-
-          Column {
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Style.space(2)
-
-            Text {
-              text: "CLIPBOARD"
-              color: root.foreground
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.title
-              font.bold: true
-              font.letterSpacing: 1.2
-            }
-
-            Text {
-              text: root.history.length + (root.history.length === 1 ? " saved item" : " saved items")
-              color: root.dim
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.caption
-            }
-          }
-
-          Rectangle {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            width: clearLabel.implicitWidth + Style.space(18)
-            height: Style.space(28)
-            radius: Style.cornerRadius
-            color: clearArea.containsMouse ? Style.hoverFillFor(root.foreground, root.accent) : "transparent"
-
-            Text {
-              id: clearLabel
-              anchors.centerIn: parent
-              text: "Clear all"
-              color: clearArea.containsMouse ? Style.hoverStateColor(root.foreground, root.accent) : root.dim
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.caption
-            }
-
-            MouseArea {
-              id: clearArea
-              anchors.fill: parent
-              enabled: root.history.length > 0
-              hoverEnabled: true
-              cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-              onClicked: root.clearConfirmOpen = true
-            }
-          }
-        }
-
+        // Compact search row: filter field, entry count, clear-all.
         Rectangle {
           width: parent.width
-          height: Style.space(40)
+          height: Style.space(34)
           radius: Style.cornerRadius
-          color: Style.hoverFillFor(root.foreground, root.accent)
+          color: Style.normalFillFor(root.foreground)
+
+          Text {
+            id: searchGlyph
+            anchors.left: parent.left
+            anchors.leftMargin: Style.space(10)
+            anchors.verticalCenter: parent.verticalCenter
+            text: ""
+            color: root.dim
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.body
+          }
 
           Row {
-            anchors.fill: parent
-            anchors.leftMargin: Style.space(12)
-            anchors.rightMargin: Style.space(12)
-            spacing: Style.space(9)
+            id: searchTrailing
+            anchors.right: parent.right
+            anchors.rightMargin: Style.space(4)
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: Style.space(4)
 
             Text {
               anchors.verticalCenter: parent.verticalCenter
-              text: ""
+              visible: root.history.length > 0
+              text: String(root.history.length)
               color: root.dim
               font.family: root.fontFamily
-              font.pixelSize: Style.font.body
+              font.pixelSize: Style.font.caption
             }
 
-            Text {
+            Rectangle {
+              id: clearAllButton
               anchors.verticalCenter: parent.verticalCenter
-              width: parent.width - Style.space(32)
-              text: root.filterText || "Type to search clipboard history…"
-              color: root.filterText ? root.foreground : root.dim
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.body
-              elide: Text.ElideRight
+              width: Style.space(24)
+              height: Style.space(24)
+              radius: Style.cornerRadius
+              enabled: root.history.length > 0
+              opacity: enabled ? 1 : 0
+              color: clearArea.containsMouse
+                ? Style.hoverFillFor(root.foreground, root.accent) : "transparent"
+
+              Text {
+                anchors.centerIn: parent
+                text: "󰆼"
+                color: clearArea.containsMouse ? root.foreground : root.dim
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.body
+              }
+
+              MouseArea {
+                id: clearArea
+                anchors.fill: parent
+                enabled: clearAllButton.enabled
+                hoverEnabled: true
+                cursorShape: clearAllButton.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                onClicked: root.clearConfirmOpen = true
+              }
             }
+          }
+
+          Text {
+            anchors.left: searchGlyph.right
+            anchors.leftMargin: Style.space(8)
+            anchors.right: searchTrailing.left
+            anchors.rightMargin: Style.space(8)
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.filterText || "Type to search…"
+            color: root.filterText ? root.foreground : root.dim
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.bodySmall
+            elide: Text.ElideRight
           }
         }
 
         Item {
           width: parent.width
-          height: parent.height - Style.space(34) - Style.space(40) - Style.space(30) - parent.spacing * 3
+          height: parent.height - Style.space(34) - Style.space(18) - parent.spacing * 2
           clip: true
 
           ListView {
             id: resultList
             anchors.fill: parent
             model: displayModel
-            spacing: Style.space(4)
+            spacing: Style.space(3)
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
@@ -340,100 +332,105 @@ Panel {
               required property int index
               required property string entryType
               required property string previewText
-              required property string fullText
               required property string previewImage
 
               readonly property bool selected: root.cursorActive && index === root.selectedIndex
 
               width: ListView.view.width
-              height: Style.space(66)
+              height: Style.space(30)
               radius: Style.cornerRadius
               color: selected || rowArea.containsMouse
                 ? Style.hoverFillFor(root.foreground, root.accent)
                 : "transparent"
 
-              Row {
-                z: 1
-                anchors.fill: parent
-                anchors.margins: Style.space(8)
-                spacing: Style.space(10)
+              Rectangle {
+                anchors.left: parent.left
+                anchors.leftMargin: Style.space(3)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Style.space(2)
+                height: parent.height - Style.space(12)
+                radius: 1
+                visible: row.selected
+                color: root.accent
+              }
+
+              Item {
+                id: lead
+                anchors.left: parent.left
+                anchors.leftMargin: Style.space(9)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Style.space(22)
+                height: Style.space(22)
 
                 Rectangle {
-                  width: parent.height
-                  height: parent.height
-                  radius: Math.max(2, Style.cornerRadius - 1)
+                  anchors.fill: parent
+                  visible: row.previewImage.length > 0
+                  radius: Math.max(2, Style.cornerRadius - 2)
                   color: Style.normalFillFor(root.foreground)
                   clip: true
 
                   Image {
                     anchors.fill: parent
-                    anchors.margins: Style.space(3)
+                    anchors.margins: 1
                     visible: row.previewImage.length > 0
                     source: row.previewImage
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
                     smooth: true
                   }
-
-                  Text {
-                    anchors.centerIn: parent
-                    visible: row.previewImage.length === 0
-                    text: row.entryType === "file" ? "" : "󰅌"
-                    color: row.selected ? root.accent : root.dim
-                    font.family: root.fontFamily
-                    font.pixelSize: Style.font.heading
-                  }
                 }
 
-                Column {
-                  anchors.verticalCenter: parent.verticalCenter
-                  width: parent.width - parent.height - parent.spacing - deleteButton.width
-                  spacing: Style.space(5)
+                Text {
+                  anchors.centerIn: parent
+                  visible: row.previewImage.length === 0
+                  text: row.entryType === "file" ? "" : "󰅌"
+                  color: row.selected ? root.accent : root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.body
+                }
+              }
 
-                  Text {
-                    width: parent.width
-                    text: row.previewText
-                    color: root.foreground
-                    font.family: root.fontFamily
-                    font.pixelSize: Style.font.body
-                    elide: Text.ElideRight
-                    maximumLineCount: 1
-                  }
+              Text {
+                anchors.left: lead.right
+                anchors.leftMargin: Style.space(8)
+                anchors.right: deleteButton.left
+                anchors.rightMargin: Style.space(4)
+                anchors.verticalCenter: parent.verticalCenter
+                text: row.previewText
+                color: root.foreground
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.bodySmall
+                elide: Text.ElideRight
+                maximumLineCount: 1
+              }
 
-                  Text {
-                    width: parent.width
-                    text: row.entryType === "image" ? "IMAGE" : (row.entryType === "file" ? "FILE" : "TEXT")
-                    color: root.dim
-                    font.family: root.fontFamily
-                    font.pixelSize: Style.font.caption
-                    font.letterSpacing: 1
-                  }
+              Rectangle {
+                id: deleteButton
+                anchors.right: parent.right
+                anchors.rightMargin: Style.space(4)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Style.space(22)
+                height: Style.space(22)
+                radius: Style.cornerRadius
+                opacity: row.selected || rowArea.containsMouse || deleteArea.containsMouse ? 1 : 0
+                color: deleteArea.containsMouse
+                  ? Style.hoverFillFor(Color.urgent, Color.urgent) : "transparent"
+
+                Text {
+                  anchors.centerIn: parent
+                  text: "󰆴"
+                  color: deleteArea.containsMouse ? Color.urgent : root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
                 }
 
-                Rectangle {
-                  id: deleteButton
-                  anchors.verticalCenter: parent.verticalCenter
-                  width: Style.space(28)
-                  height: Style.space(28)
-                  radius: Style.cornerRadius
-                  visible: row.selected || rowArea.containsMouse || deleteArea.containsMouse
-                  color: deleteArea.containsMouse ? Style.hoverFillFor(Color.urgent, Color.urgent) : "transparent"
-
-                  Text {
-                    anchors.centerIn: parent
-                    text: "󰆴"
-                    color: deleteArea.containsMouse ? Color.urgent : root.dim
-                    font.family: root.fontFamily
-                    font.pixelSize: Style.font.body
-                  }
-
-                  MouseArea {
-                    id: deleteArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.removeIndex(row.index)
-                  }
+                MouseArea {
+                  id: deleteArea
+                  anchors.fill: parent
+                  enabled: deleteButton.opacity > 0
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  onClicked: root.removeIndex(row.index)
                 }
               }
 
@@ -458,14 +455,14 @@ Panel {
           Column {
             anchors.centerIn: parent
             visible: displayModel.count === 0
-            spacing: Style.space(8)
+            spacing: Style.space(6)
 
             Text {
               width: parent.width
-              text: root.history.length === 0 ? "󰅌" : ""
+              text: root.history.length === 0 ? "󰅌" : ""
               color: root.dim
               font.family: root.fontFamily
-              font.pixelSize: Style.font.displayLarge
+              font.pixelSize: Style.font.display
               horizontalAlignment: Text.AlignHCenter
             }
 
@@ -476,7 +473,7 @@ Panel {
                 : "No matches for “" + root.filterText + "”"
               color: root.dim
               font.family: root.fontFamily
-              font.pixelSize: Style.font.body
+              font.pixelSize: Style.font.bodySmall
               horizontalAlignment: Text.AlignHCenter
             }
           }
@@ -484,7 +481,7 @@ Panel {
 
         Item {
           width: parent.width
-          height: Style.space(30)
+          height: Style.space(18)
 
           Text {
             anchors.left: parent.left
@@ -516,15 +513,15 @@ Panel {
 
         Column {
           anchors.centerIn: parent
-          width: Math.min(parent.width - Style.space(40), Style.space(330))
-          spacing: Style.space(14)
+          width: Math.min(parent.width - Style.space(40), Style.space(300))
+          spacing: Style.space(12)
 
           Text {
             width: parent.width
             text: "Clear clipboard history?"
             color: root.foreground
             font.family: root.fontFamily
-            font.pixelSize: Style.font.heading
+            font.pixelSize: Style.font.subtitle
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
           }
@@ -534,7 +531,7 @@ Panel {
             text: "This removes all saved text, files, and image references."
             color: root.dim
             font.family: root.fontFamily
-            font.pixelSize: Style.font.body
+            font.pixelSize: Style.font.bodySmall
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
           }
@@ -544,8 +541,8 @@ Panel {
             spacing: Style.space(10)
 
             Rectangle {
-              width: Style.space(96)
-              height: Style.space(34)
+              width: Style.space(88)
+              height: Style.space(30)
               radius: Style.cornerRadius
               color: cancelArea.containsMouse ? Style.hoverFillFor(root.foreground, root.accent) : "transparent"
               border.width: Style.normalBorderWidth
@@ -556,7 +553,7 @@ Panel {
                 text: "Cancel"
                 color: root.foreground
                 font.family: root.fontFamily
-                font.pixelSize: Style.font.body
+                font.pixelSize: Style.font.bodySmall
               }
 
               MouseArea {
@@ -572,8 +569,8 @@ Panel {
             }
 
             Rectangle {
-              width: Style.space(96)
-              height: Style.space(34)
+              width: Style.space(88)
+              height: Style.space(30)
               radius: Style.cornerRadius
               color: confirmArea.containsMouse ? Color.urgent : Style.normalFillFor(Color.urgent)
 
@@ -582,7 +579,7 @@ Panel {
                 text: "Clear all"
                 color: root.foreground
                 font.family: root.fontFamily
-                font.pixelSize: Style.font.body
+                font.pixelSize: Style.font.bodySmall
                 font.bold: true
               }
 
