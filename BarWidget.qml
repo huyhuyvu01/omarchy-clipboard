@@ -19,7 +19,7 @@ BarWidget {
   }
 
   function open() {
-    if (panelLoader.item) panelLoader.item.open()
+    if (panelLoader.item) panelLoader.item.openAtCursor()
   }
 
   function close() {

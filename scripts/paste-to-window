@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+# Restore the window captured before the panel took keyboard focus. Never
+# send the paste to a different app if that destination has since closed.
+target=$1
+shift
+[[ $target =~ ^0x[[:xdigit:]]+$ ]] || exit 1
+hyprctl dispatch "hl.dsp.focus({ window = \"address:$target\" })" >/dev/null 2>&1 ||
+  hyprctl dispatch focuswindow "address:$target" >/dev/null
+[[ $(hyprctl -j activewindow | jq -r '.address') == "$target" ]] || exit 1
+exec "$@"

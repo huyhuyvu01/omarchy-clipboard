@@ -12,6 +12,7 @@ and opening entries, so it does not start a second `wl-paste` watcher.
 ## Features
 
 - Search clipboard history by typing while the panel is open
+- Open at the mouse cursor with Super + . and paste into the original textbox
 - Preview text, copied files, and captured images
 - Left click or press Enter to paste an entry
 - Right click or press Shift+Enter to copy without pasting
@@ -25,10 +26,30 @@ and opening entries, so it does not start a second `wl-paste` watcher.
 - Omarchy Quattro
 - The built-in `omarchy.clipboard` service enabled (the Omarchy default)
 - Omarchy's standard clipboard helper commands
+- `hyprctl`, Python 3, Bash, and `jq` (included with Omarchy)
 
 The panel consumes
 `~/.local/state/omarchy/clipboard-history.json`. Clipboard monitoring and
 sensitive-clipboard filtering remain owned by the built-in service.
+
+## Keyboard shortcut
+
+After enabling the plugin, add this to `~/.config/hypr/bindings.lua`:
+
+```lua
+o.bind("SUPER + PERIOD", "Clipboard history at cursor", "omarchy-shell shell toggle io.github.vuhuy.clipboard-manager")
+```
+
+If you already use Super + . for something else, add
+`hl.unbind("SUPER + PERIOD")` before the binding. Run `hyprctl reload` and
+check `hyprctl configerrors` after editing.
+
+Focus a textbox, press **Super + .**, then type to search. Click an entry or
+press **Enter** to paste into the original window. **Shift+Enter** copies
+without pasting. **Escape** clears the search, then closes the panel; pressing
+the shortcut again also closes it. The popup stays within the cursor's monitor,
+including scaled and rotated displays. Clicking the bar icon still opens the
+panel beside the bar.
 
 ## Local development
 

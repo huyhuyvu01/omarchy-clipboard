@@ -17,6 +17,9 @@ Panel {
   property int selectedIndex: 0
   property bool cursorActive: false
   property bool clearConfirmOpen: false
+  property bool atCursor: false
+  property bool cursorOpenPending: false
+  property string pasteTarget: ""
 
   readonly property var barIdentity: hostWidget || root
   readonly property string omarchyPath: Quickshell.env("OMARCHY_PATH") || "/usr/share/omarchy"
@@ -27,7 +30,24 @@ Panel {
   readonly property color dim: Qt.darker(foreground, 1.55)
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
 
+  function scriptPath(name) {
+    return decodeURIComponent(String(Qt.resolvedUrl("scripts/" + name)).replace(/^file:\/\//, ""))
+  }
+
   function open() {
+    cursorOpenPending = false
+    atCursor = false
+    pasteTarget = ""
+    showHistory()
+  }
+
+  function openAtCursor() {
+    if (cursorContext.running) return
+    cursorOpenPending = true
+    cursorContext.running = true
+  }
+
+  function showHistory() {
     filterText = ""
     selectedIndex = 0
     cursorActive = true
@@ -38,8 +58,10 @@ Panel {
   }
 
   function close() {
+    cursorOpenPending = false
     clearConfirmOpen = false
     controller.hide()
+    if (bar && bar.activePopout === barIdentity) bar.releasePopout(barIdentity)
   }
 
   function toggle() {
@@ -123,14 +145,22 @@ Panel {
       var imageArgs = [omarchyPath + "/bin/omarchy-clipboard-paste-file"]
       if (copyOnly) imageArgs.push("--copy-only")
       imageArgs.push(row.mime, row.path)
-      Quickshell.execDetached(imageArgs)
+      paste(imageArgs, copyOnly)
     } else if (row.fullText) {
       var textArgs = [omarchyPath + "/bin/omarchy-clipboard-paste-text"]
       if (copyOnly) textArgs.push("--copy-only")
       else textArgs.push("--shift-insert")
       textArgs.push("--history-index", String(row.historyIndex))
-      Quickshell.execDetached(textArgs)
+      paste(textArgs, copyOnly)
     }
+  }
+
+  function paste(args, copyOnly) {
+    if (!copyOnly && atCursor) {
+      args = ["bash", scriptPath("paste-to-window"), pasteTarget].concat(args)
+    }
+    // Let the layer surface unmap before restoring the original app's focus.
+    Qt.callLater(function() { Quickshell.execDetached(args) })
   }
 
   function openIndex(index) {
@@ -157,18 +187,52 @@ Panel {
 
   ListModel { id: displayModel }
 
+  Process {
+    id: cursorContext
+    command: ["python3", root.scriptPath("cursor-context.py")]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        if (!root.cursorOpenPending) return
+        root.cursorOpenPending = false
+        try {
+          var context = JSON.parse(text)
+          var screen = Quickshell.screens.find(function(s) { return s.name === context.screen })
+          if (!screen) return
+          cursorPanel.screen = screen
+          cursorPanel.cursorPosition = Qt.point(context.x, context.y)
+          root.pasteTarget = context.address
+          root.atCursor = true
+          if (root.bar) root.bar.requestPopout(root.barIdentity)
+          root.showHistory()
+        } catch (error) {
+          console.warn("Clipboard cursor context:", error)
+        }
+      }
+    }
+  }
+
+  CursorPanel {
+    id: cursorPanel
+    open: root.opened && root.atCursor
+    focusTarget: keyCatcher
+    onDismissed: root.close()
+  }
+
   KeyboardPanel {
     id: panel
     anchorItem: root.anchorItem
     owner: root.barIdentity
     bar: root.bar
-    open: root.opened
+    open: root.opened && !root.atCursor
     focusTarget: keyCatcher
     contentWidth: panel.fittedContentWidth(Style.space(400))
     contentHeight: panel.cappedContentHeight(Style.space(440))
 
+    Item { id: barContent; anchors.fill: parent }
+
     Item {
       id: keyCatcher
+      parent: root.atCursor ? cursorPanel.contentHost : barContent
       anchors.fill: parent
       focus: true
 
